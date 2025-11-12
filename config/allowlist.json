@@ -1,0 +1,55 @@
+{
+  "description": "Allowlist configuration for Desktop Automation Agent",
+  "version": "1.0",
+
+  "allowed_folders": [
+    "C:\\Users\\%USERNAME%\\Downloads",
+    "C:\\Users\\%USERNAME%\\Desktop",
+    "C:\\Users\\%USERNAME%\\Documents",
+    "C:\\Users\\%USERNAME%\\Pictures",
+    "S:\\"
+  ],
+
+  "allowed_apps": [
+    "notepad.exe",
+    "calc.exe",
+    "mspaint.exe",
+    "explorer.exe"
+  ],
+
+  "forbidden_folders": [
+    "C:\\Windows",
+    "C:\\Program Files",
+    "C:\\Program Files (x86)",
+    "C:\\Users\\%USERNAME%\\AppData"
+  ],
+
+  "forbidden_extensions": [
+    ".exe",
+    ".dll",
+    ".sys",
+    ".bat",
+    ".cmd",
+    ".ps1"
+  ],
+
+  "confirmation_rules": {
+    "mode": "selective",
+    "auto_approve_actions": [
+      "open_folder",
+      "find_file",
+      "create_file"
+    ],
+    "always_confirm_actions": [
+      "delete_file",
+      "send_email",
+      "run_command"
+    ]
+  },
+
+  "limits": {
+    "max_actions_per_session": 50,
+    "max_file_size_mb": 100,
+    "max_email_attachments": 5
+  }
+}

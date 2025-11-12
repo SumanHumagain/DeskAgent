@@ -1,0 +1,55 @@
+# Desktop Automation Agent - Dependencies
+# MVP Phase 1 Requirements
+
+# LLM & AI
+openai>=1.12.0                    # OpenAI API for GPT-4o-mini
+python-dotenv>=1.0.0              # Environment variable management
+
+# GUI Automation
+pywinauto>=0.6.8                  # Windows GUI automation (primary)
+pyautogui>=0.9.54                 # Cross-platform GUI automation (fallback)
+pygetwindow>=0.0.9                # Window management
+pywin32>=306                      # Windows API access
+
+# File & System Operations
+# pathlib - Built-in module, no install needed
+psutil>=5.9.0                     # Process and system utilities
+
+# Email
+# Note: Using built-in smtplib, secure-smtplib not needed
+
+# Data & Configuration
+pydantic>=2.5.0                   # Data validation & settings
+pydantic-settings>=2.1.0          # Settings management
+
+# Logging & Database
+# sqlite3 - Built-in module, no install needed
+
+# CLI & Output
+rich>=13.7.0                      # Rich terminal output
+click>=8.1.7                      # CLI framework (alternative to argparse)
+
+# Utilities
+typing-extensions>=4.9.0          # Type hints support
+
+# Development & Testing (optional for MVP, but good to have)
+pytest>=7.4.0                     # Testing framework
+pytest-cov>=4.1.0                 # Test coverage
+
+# Phase 2 Dependencies (commented out for now, uncomment when needed)
+# pytesseract>=0.3.10             # OCR for screen reading
+# Pillow>=10.0.0                  # Image processing
+# pdfplumber>=0.10.0              # PDF text extraction
+# pystray>=0.19.5                 # System tray icon
+# plyer>=2.1.0                    # Desktop notifications
+
+# Phase 4 Dependencies (future)
+# playwright>=1.40.0              # Browser automation
+# openpyxl>=3.1.0                 # Excel file handling
+# tabula-py>=2.8.0                # PDF table extraction
+# opencv-python>=4.8.0            # Computer vision
+# easyocr>=1.7.0                  # Better OCR
+
+# Local LLM Support (future, optional)
+# llama-cpp-python>=0.2.0         # Local LLM inference
+# langchain>=0.1.0                # LLM orchestration

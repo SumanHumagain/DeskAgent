@@ -1,0 +1,443 @@
+{
+  "description": "Action schema for Desktop Automation Agent - Defines all supported actions",
+  "version": "1.0-mvp",
+
+  "actions": [
+    {
+      "action": "open_folder",
+      "description": "Opens a folder in Windows Explorer",
+      "risk_level": "low",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Full path to the folder to open"
+        }
+      },
+      "example": {
+        "action": "open_folder",
+        "args": {
+          "path": "C:\\Users\\Me\\Downloads"
+        }
+      }
+    },
+    {
+      "action": "find_file",
+      "description": "Searches for files in a directory matching a pattern and shows them in Windows Explorer",
+      "risk_level": "low",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Directory path to search in"
+        },
+        "pattern": {
+          "type": "string",
+          "required": true,
+          "description": "File pattern (e.g., '*.pdf', 'report*.docx')"
+        },
+        "latest": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "If true, return only the most recently modified file"
+        },
+        "recursive": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Search in subdirectories"
+        },
+        "show_in_explorer": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "If true, open Windows Explorer and highlight the found file(s)"
+        }
+      },
+      "example": {
+        "action": "find_file",
+        "args": {
+          "path": "C:\\Users\\Me\\Documents",
+          "pattern": "*.pdf",
+          "latest": true,
+          "show_in_explorer": true
+        }
+      }
+    },
+    {
+      "action": "create_file",
+      "description": "Creates a new text file with specified content",
+      "risk_level": "medium",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Full path for the new file"
+        },
+        "content": {
+          "type": "string",
+          "required": true,
+          "description": "Text content to write to the file"
+        },
+        "overwrite": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Overwrite if file exists"
+        }
+      },
+      "example": {
+        "action": "create_file",
+        "args": {
+          "path": "C:\\Users\\Me\\Desktop\\notes.txt",
+          "content": "Meeting notes:\\n- Item 1\\n- Item 2"
+        }
+      }
+    },
+    {
+      "action": "open_file",
+      "description": "Opens a file with its default application",
+      "risk_level": "medium",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Full path to the file to open"
+        }
+      },
+      "example": {
+        "action": "open_file",
+        "args": {
+          "path": "C:\\Users\\Me\\Documents\\report.pdf"
+        }
+      }
+    },
+    {
+      "action": "show_file_in_explorer",
+      "description": "Opens Windows Explorer and highlights/selects a specific file",
+      "risk_level": "low",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Full path to the file to show"
+        }
+      },
+      "example": {
+        "action": "show_file_in_explorer",
+        "args": {
+          "path": "C:\\Users\\Me\\Downloads\\report.pdf"
+        }
+      }
+    },
+    {
+      "action": "copy_file",
+      "description": "Copy a file from source to destination",
+      "risk_level": "medium",
+      "args": {
+        "source": {
+          "type": "string",
+          "required": true,
+          "description": "Source file path. Can use {{RESULT_X.files[0].path}} to reference previous results"
+        },
+        "destination": {
+          "type": "string",
+          "required": true,
+          "description": "Destination path (file or directory)"
+        },
+        "overwrite": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Overwrite if file exists"
+        }
+      },
+      "example": {
+        "action": "copy_file",
+        "args": {
+          "source": "C:\\Users\\Me\\Downloads\\report.pdf",
+          "destination": "S:\\"
+        }
+      }
+    },
+    {
+      "action": "move_file",
+      "description": "Move a file from source to destination",
+      "risk_level": "high",
+      "args": {
+        "source": {
+          "type": "string",
+          "required": true,
+          "description": "Source file path. Can use {{RESULT_X.files[0].path}} to reference previous results"
+        },
+        "destination": {
+          "type": "string",
+          "required": true,
+          "description": "Destination path (file or directory)"
+        },
+        "overwrite": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Overwrite if file exists"
+        }
+      },
+      "example": {
+        "action": "move_file",
+        "args": {
+          "source": "C:\\Users\\Me\\Downloads\\old_file.pdf",
+          "destination": "C:\\Users\\Me\\Archive\\"
+        }
+      }
+    },
+    {
+      "action": "delete_file",
+      "description": "Delete a file permanently",
+      "risk_level": "high",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "File path to delete. Can use {{RESULT_X.files[0].path}} to reference previous results"
+        }
+      },
+      "example": {
+        "action": "delete_file",
+        "args": {
+          "path": "C:\\Users\\Me\\Downloads\\temp.txt"
+        }
+      }
+    },
+    {
+      "action": "send_email",
+      "description": "Sends an email via SMTP",
+      "risk_level": "high",
+      "args": {
+        "to": {
+          "type": "string",
+          "required": true,
+          "description": "Recipient email address"
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "description": "Email subject"
+        },
+        "body": {
+          "type": "string",
+          "required": true,
+          "description": "Email body text"
+        },
+        "attachments": {
+          "type": "array",
+          "required": false,
+          "description": "List of file paths to attach"
+        }
+      },
+      "example": {
+        "action": "send_email",
+        "args": {
+          "to": "user@example.com",
+          "subject": "Automated Report",
+          "body": "Please find the attached report.",
+          "attachments": ["C:\\Users\\Me\\Desktop\\report.pdf"]
+        }
+      }
+    },
+    {
+      "action": "list_files",
+      "description": "Lists all files in a directory",
+      "risk_level": "low",
+      "args": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Directory path to list"
+        },
+        "details": {
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Include file size, modified date"
+        }
+      },
+      "example": {
+        "action": "list_files",
+        "args": {
+          "path": "C:\\Users\\Me\\Downloads",
+          "details": true
+        }
+      }
+    },
+    {
+      "action": "launch_app",
+      "description": "Launches any Windows application, system utility, or Control Panel item. You must intelligently determine the correct Windows command.",
+      "risk_level": "low",
+      "args": {
+        "command": {
+          "type": "string",
+          "required": true,
+          "description": "The Windows command to execute. Common examples: 'control' (Control Panel), 'taskmgr' (Task Manager), 'ms-settings:' (Settings), 'devmgmt.msc' (Device Manager), 'notepad.exe', 'calc.exe', 'mspaint.exe', 'cmd.exe', 'powershell.exe', 'services.msc', 'eventvwr.msc', 'regedit', 'msconfig', etc. Use your knowledge of Windows commands."
+        },
+        "args": {
+          "type": "string",
+          "required": false,
+          "description": "Optional command-line arguments"
+        }
+      },
+      "example": {
+        "action": "launch_app",
+        "args": {
+          "command": "control"
+        }
+      }
+    },
+    {
+      "action": "navigate_settings",
+      "description": "DEPRECATED: Legacy navigation method. Use ai_navigate instead for better reliability.",
+      "risk_level": "medium",
+      "args": {
+        "ui_path": {
+          "type": "array",
+          "required": true,
+          "description": "Navigation path as array of strings. Example: ['Control Panel', 'File Explorer Options', 'View']"
+        },
+        "action": {
+          "type": "object",
+          "required": true,
+          "description": "Action to perform. Format: {type: 'checkbox', name: 'Show hidden files', value: true}"
+        }
+      },
+      "example": {
+        "action": "navigate_settings",
+        "args": {
+          "ui_path": ["Control Panel", "File Explorer Options", "View"],
+          "action": {"type": "checkbox", "name": "Show hidden files", "value": true}
+        }
+      }
+    },
+    {
+      "action": "ai_navigate",
+      "description": "AI-DRIVEN NAVIGATION: The intelligent, self-healing way to interact with ANY Windows setting. AI analyzes the UI in real-time and decides what to do. Works for Bluetooth, Wi-Fi, display settings, and ANY other Windows setting without hardcoded control types. ALWAYS use this for settings changes!",
+      "risk_level": "low",
+      "args": {
+        "goal": {
+          "type": "string",
+          "required": true,
+          "description": "What you want to achieve in plain language (e.g., 'turn on bluetooth', 'set volume to max', 'enable dark mode')"
+        },
+        "window_search_terms": {
+          "type": "array",
+          "required": true,
+          "description": "Keywords to find the settings window (e.g., ['Settings', 'Bluetooth'], ['Settings', 'Sound'])"
+        },
+        "open_command": {
+          "type": "string",
+          "required": false,
+          "description": "Command to open the window (e.g., 'ms-settings:bluetooth', 'start ms-settings:', 'control')"
+        }
+      },
+      "example": {
+        "action": "ai_navigate",
+        "args": {
+          "goal": "turn on bluetooth",
+          "window_search_terms": ["Settings", "Bluetooth"],
+          "open_command": "start ms-settings:bluetooth"
+        }
+      }
+    },
+    {
+      "action": "get_top_processes_by_memory",
+      "description": "Get top N processes by memory/RAM usage. Returns list of processes sorted by memory consumption.",
+      "risk_level": "low",
+      "args": {
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 5,
+          "description": "Number of top processes to return (default: 5)"
+        },
+        "exclude_fields": {
+          "type": "array",
+          "required": false,
+          "description": "List of fields to exclude from output. Valid values: 'pid', 'memory_percent', etc. Use when user says 'without pid' or 'hide pid'."
+        }
+      },
+      "example": {
+        "action": "get_top_processes_by_memory",
+        "args": {
+          "limit": 5,
+          "exclude_fields": ["pid"]
+        }
+      }
+    },
+    {
+      "action": "run_python_code",
+      "description": "META-PRIMITIVE: Execute Python code to query system information, perform calculations, or any programmatic task. OpenAI should generate the code dynamically based on user intent. Examples: battery status (psutil), system info, file analysis, data processing, etc.",
+      "risk_level": "medium",
+      "args": {
+        "code": {
+          "type": "string",
+          "required": true,
+          "description": "Python code to execute. Can import any installed module (psutil, os, sys, etc.). Code should return a result or print output."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "Human-readable description of what this code does"
+        }
+      },
+      "example": {
+        "action": "run_python_code",
+        "args": {
+          "code": "import psutil; battery = psutil.sensors_battery(); result = {'percentage': battery.percent, 'plugged_in': battery.power_plugged, 'status': 'Charging' if battery.power_plugged else 'Discharging'}; print(result)",
+          "description": "Get battery status"
+        }
+      }
+    },
+    {
+      "action": "run_powershell",
+      "description": "META-PRIMITIVE: Execute PowerShell commands for system operations like uninstalling software, managing services, registry operations, etc. OpenAI generates PowerShell code dynamically.",
+      "risk_level": "high",
+      "args": {
+        "script": {
+          "type": "string",
+          "required": true,
+          "description": "PowerShell script to execute. Can use WMI, Get-WmiObject, registry operations, etc."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "Human-readable description of what this script does"
+        }
+      },
+      "example": {
+        "action": "run_powershell",
+        "args": {
+          "script": "Get-WmiObject -Class Win32_Product | Where-Object {$_.Name -like '*Adobe*'} | ForEach-Object { Write-Host \"Uninstalling: $($_.Name)\"; $_.Uninstall() }",
+          "description": "Uninstall all Adobe software"
+        }
+      }
+    }
+  ],
+
+  "llm_instructions": "You are a Desktop Action Planner. Convert user prompts into structured JSON arrays of actions. ONLY use actions from the schema above. ONLY output valid JSON - no explanations. Each action must have 'action' and 'args' fields. If uncertain, ask the user for clarification by returning a special 'clarify' action.",
+
+  "output_format_example": [
+    {
+      "action": "open_folder",
+      "args": {
+        "path": "C:\\Users\\Me\\Downloads"
+      }
+    },
+    {
+      "action": "find_file",
+      "args": {
+        "path": "C:\\Users\\Me\\Downloads",
+        "pattern": "*.pdf",
+        "latest": true
+      }
+    }
+  ]
+}

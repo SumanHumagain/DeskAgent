@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --prompt \"check battery percentage\")",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --prompt \"show CPU usage\")",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --get-logs 2)",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --get-logs 3)",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --prompt \"list all adobe software installed\")",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --get-logs 1)",
+      "Bash(\"venv\\Scripts\\python.exe\" src/api_wrapper.py --prompt \"decrease brightness\")",
+      "Bash(venvScriptspython.exe src/api_wrapper.py --prompt \"show top 5 processes by memory without pid\")",
+      "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\python.exe\":*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\pip.exe\" install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
