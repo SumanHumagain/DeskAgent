@@ -16,7 +16,10 @@
       "Bash(dir:*)",
       "Bash(git fetch:*)",
       "Bash(git stash:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --prompt \"turn off windows firewall domain network\" --plan-only)",
+      "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --execute-plan)",
+      "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --prompt \"turn off windows firewall domain network using gui\" --plan-only)"
     ],
     "deny": [],
     "ask": []

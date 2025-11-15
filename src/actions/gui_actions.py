@@ -724,28 +724,42 @@ class GUIActions:
                 print(f"[AI GUIDED] Attempt {attempt + 1}/{max_attempts}", file=sys.stderr)
 
                 # Step 1: Introspect UI
-                # Smart search: Keep using Settings window for Settings navigation
-                # Use wizard terms for installer/uninstaller flows
+                # DYNAMIC FIX: Detect Settings vs Wizard flows automatically
+                # Settings: Stay in Settings window, navigate within it
+                # Wizard: Look for dialog windows that appear during installation
+
                 if step_num == 0:
+                    # First step: use the original window search terms
                     search_terms = window_search_terms
                 else:
-                    # Detect if this is Settings navigation or wizard flow
-                    # Check if ANY of the keywords appear in ANY of the search terms
-                    settings_keywords = ["Settings", "Firewall", "Bluetooth", "WiFi", "Network", "Defender"]
-                    is_settings_flow = any(
-                        any(keyword.lower() in str(term).lower() for keyword in settings_keywords)
-                        for term in window_search_terms
+                    # CRITICAL FIX: Detect if this is Settings navigation
+                    # Check if goal OR window_search_terms mention Settings-related operations
+                    goal_lower = goal.lower()
+                    search_terms_str = ' '.join([str(t).lower() for t in window_search_terms])
+
+                    # Settings-related keywords
+                    settings_indicators = [
+                        'settings', 'firewall', 'bluetooth', 'wifi', 'network', 'defender',
+                        'display', 'sound', 'privacy', 'update', 'storage', 'personalization',
+                        'system', 'turn off', 'turn on', 'enable', 'disable', 'toggle'
+                    ]
+
+                    # Check if this is a Settings operation
+                    is_settings_operation = any(
+                        indicator in goal_lower or indicator in search_terms_str
+                        for indicator in settings_indicators
                     )
 
-                    if is_settings_flow:
-                        # Settings flow - keep looking for Settings window
-                        # Use specific window title to avoid matching Taskbar buttons
-                        search_terms = ["Settings"]
-                        print(f"[AI GUIDED] Settings flow detected - keeping Settings window", file=sys.stderr)
+                    if is_settings_operation:
+                        # Settings flow: Use ORIGINAL window search terms
+                        # This allows finding "Windows Defender Firewall", "Settings", etc.
+                        # But exclude Taskbar from being matched
+                        search_terms = window_search_terms
+                        print(f"[AI GUIDED] 🎯 Settings operation detected - using: {search_terms}", file=sys.stderr)
                     else:
-                        # Installer/wizard flow - look for dialog windows
-                        search_terms = ["", "wizard", "install", "uninstall", "setup"]
-                        print(f"[AI GUIDED] Wizard flow detected - looking for dialog windows", file=sys.stderr)
+                        # Wizard/Dialog flow: Look for popup windows
+                        search_terms = ["", "wizard", "install", "uninstall", "setup", "dialog"]
+                        print(f"[AI GUIDED] 📦 Wizard/Dialog flow detected - looking for popup windows", file=sys.stderr)
 
                 ui_info = self.introspect_ui(search_terms, open_command if step_num == 0 and attempt == 0 else None)
 
