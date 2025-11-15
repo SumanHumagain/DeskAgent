@@ -730,12 +730,22 @@ class GUIActions:
                     search_terms = window_search_terms
                 else:
                     # Detect if this is Settings navigation or wizard flow
-                    if any(term in ["Settings", "Firewall", "Bluetooth", "WiFi", "Network"] for term in window_search_terms):
+                    # Check if ANY of the keywords appear in ANY of the search terms
+                    settings_keywords = ["Settings", "Firewall", "Bluetooth", "WiFi", "Network", "Defender"]
+                    is_settings_flow = any(
+                        any(keyword.lower() in str(term).lower() for keyword in settings_keywords)
+                        for term in window_search_terms
+                    )
+
+                    if is_settings_flow:
                         # Settings flow - keep looking for Settings window
+                        # Use specific window title to avoid matching Taskbar buttons
                         search_terms = ["Settings"]
+                        print(f"[AI GUIDED] Settings flow detected - keeping Settings window", file=sys.stderr)
                     else:
                         # Installer/wizard flow - look for dialog windows
                         search_terms = ["", "wizard", "install", "uninstall", "setup"]
+                        print(f"[AI GUIDED] Wizard flow detected - looking for dialog windows", file=sys.stderr)
 
                 ui_info = self.introspect_ui(search_terms, open_command if step_num == 0 and attempt == 0 else None)
 

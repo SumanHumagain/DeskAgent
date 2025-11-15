@@ -12,7 +12,11 @@
       "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\python.exe\":*)",
       "Bash(cat:*)",
       "Bash(echo:*)",
-      "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\pip.exe\" install:*)"
+      "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\pip.exe\" install:*)",
+      "Bash(dir:*)",
+      "Bash(git fetch:*)",
+      "Bash(git stash:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
