@@ -4,38 +4,6 @@ const { spawn } = require('child_process');
 
 let mainWindow;
 let pythonProcess = null;
-let isRunningAsAdmin = false;
-
-// Check if running with administrator privileges (Windows only)
-function checkAdminStatus() {
-    if (process.platform === 'win32') {
-        const pythonPath = path.join(__dirname, '..', 'venv', 'Scripts', 'python.exe');
-        const scriptPath = path.join(__dirname, '..', 'src', 'api_wrapper.py');
-
-        return new Promise((resolve) => {
-            const python = spawn(pythonPath, [scriptPath, '--check-admin']);
-            let dataString = '';
-
-            python.stdout.on('data', (data) => {
-                dataString += data.toString();
-            });
-
-            python.on('close', (code) => {
-                try {
-                    if (code === 0) {
-                        const result = JSON.parse(dataString);
-                        resolve(result.is_admin || false);
-                    } else {
-                        resolve(false);
-                    }
-                } catch (error) {
-                    resolve(false);
-                }
-            });
-        });
-    }
-    return Promise.resolve(false);
-}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -48,8 +16,7 @@ function createWindow() {
         },
         backgroundColor: '#f0f2f5',
         icon: path.join(__dirname, 'icon.png'), // optional
-        autoHideMenuBar: true,
-        title: 'Desktop Automation Agent' + (isRunningAsAdmin ? ' [ADMINISTRATOR]' : '')
+        autoHideMenuBar: true
     });
 
     mainWindow.loadFile('index.html');
@@ -62,25 +29,9 @@ function createWindow() {
     mainWindow.on('closed', function () {
         mainWindow = null;
     });
-
-    // Send admin status to renderer after window loads
-    mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.webContents.send('admin-status', isRunningAsAdmin);
-    });
 }
 
-app.whenReady().then(async () => {
-    // Check admin status before creating window
-    console.log('[ADMIN] Checking administrator privileges...');
-    isRunningAsAdmin = await checkAdminStatus();
-
-    if (isRunningAsAdmin) {
-        console.log('[ADMIN] ✓ Running with Administrator privileges');
-    } else {
-        console.log('[ADMIN] ⚠ Running WITHOUT Administrator privileges');
-        console.log('[ADMIN] Some operations may fail. Please restart as Administrator.');
-    }
-
+app.whenReady().then(() => {
     createWindow();
 
     app.on('activate', function () {
@@ -146,14 +97,6 @@ ipcMain.handle('get-help', async (event) => {
             { title: 'File Creation', examples: ['Create a file on Desktop called todo.txt with content "Buy milk"'] },
             { title: 'Advanced', examples: ['Find the 3 largest files in Downloads', 'Email me the report from Downloads'] }
         ]
-    };
-});
-
-// Handle admin status request
-ipcMain.handle('check-admin', async (event) => {
-    return {
-        success: true,
-        is_admin: isRunningAsAdmin
     };
 });
 
