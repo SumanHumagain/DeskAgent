@@ -751,11 +751,18 @@ class GUIActions:
                     )
 
                     if is_settings_operation:
-                        # Settings flow: Use ORIGINAL window search terms
-                        # This allows finding "Windows Defender Firewall", "Settings", etc.
-                        # But exclude Taskbar from being matched
-                        search_terms = window_search_terms
-                        print(f"[AI GUIDED] 🎯 Settings operation detected - using: {search_terms}", file=sys.stderr)
+                        # Settings flow: Dynamic window matching
+                        # Step 1: Use original search terms to find main Settings window
+                        # Step 2+: Match ANY window (to handle new dialogs like "Customize Settings")
+                        if step_num > 1:
+                            # After initial navigation, match ANY non-excluded window
+                            # This handles cases where new dialogs open with unpredictable titles
+                            search_terms = [""]
+                            print(f"[AI GUIDED] 🎯 Settings operation (step {step_num + 1}) - matching any window", file=sys.stderr)
+                        else:
+                            # First navigation step: use original window search terms
+                            search_terms = window_search_terms
+                            print(f"[AI GUIDED] 🎯 Settings operation (step {step_num + 1}) - using: {search_terms}", file=sys.stderr)
                     else:
                         # Wizard/Dialog flow: Look for popup windows
                         search_terms = ["", "wizard", "install", "uninstall", "setup", "dialog"]
