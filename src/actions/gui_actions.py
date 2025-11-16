@@ -583,8 +583,18 @@ class GUIActions:
                     # Determine if clickable/interactable
                     clickable = control_type in ["Button", "Hyperlink", "MenuItem", "ToggleButton", "CheckBox"]
 
+                    # For unnamed toggle buttons, create a descriptive name
+                    display_name = name
+                    if not name or not name.strip():
+                        if control_type == "ToggleButton" and state:
+                            display_name = f"[Unnamed {control_type} - {state}]"
+                        elif control_type in ["ToggleButton", "CheckBox"]:
+                            display_name = f"[Unnamed {control_type}]"
+                        else:
+                            display_name = name  # Keep empty for other types
+
                     control_info = {
-                        "name": name,
+                        "name": display_name,
                         "type": control_type,
                         "clickable": clickable
                     }
@@ -594,8 +604,8 @@ class GUIActions:
                     if value:
                         control_info["value"] = value
 
-                    # Only add controls with names (ignore decorative elements)
-                    if name and name.strip():
+                    # Include controls with names OR important unnamed controls (ToggleButton, CheckBox)
+                    if (name and name.strip()) or control_type in ["ToggleButton", "CheckBox"]:
                         controls.append(control_info)
 
                 except Exception as e:
