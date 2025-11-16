@@ -7,6 +7,14 @@ import sys
 from typing import Dict, Tuple
 
 
+# Import GUI actions for fallback when admin privileges not available
+try:
+    from actions.gui_actions import GUIActions
+    GUI_AVAILABLE = True
+except ImportError:
+    GUI_AVAILABLE = False
+
+
 class BluetoothAction:
     """
     Professional Bluetooth control with:
@@ -17,7 +25,7 @@ class BluetoothAction:
 
     def __init__(self):
         """Initialize Bluetooth action handler"""
-        pass
+        self.gui_actions = GUIActions() if GUI_AVAILABLE else None
 
     def get_bluetooth_state(self) -> Tuple[bool, str, str]:
         """
@@ -179,19 +187,75 @@ if ($bluetooth) {{
                         'method_used': 'windows_runtime_api'
                     }
             else:
+                # API failed - try GUI fallback
+                print(f"[BLUETOOTH] Windows Runtime API failed, trying GUI fallback...", file=sys.stderr)
+                return self._gui_fallback(desired_state, current_state)
+
+        except Exception as e:
+            # API exception - try GUI fallback
+            print(f"[BLUETOOTH] Windows Runtime API exception, trying GUI fallback...", file=sys.stderr)
+            return self._gui_fallback(desired_state, current_state)
+
+    def _gui_fallback(self, desired_state: str, current_state: str) -> Dict:
+        """
+        Fallback to GUI automation when API access is denied
+
+        Args:
+            desired_state: "On" or "Off"
+            current_state: Current Bluetooth state
+
+        Returns:
+            Result dictionary with success status
+        """
+        if not self.gui_actions:
+            return {
+                'success': False,
+                'current_state': current_state,
+                'message': 'GUI automation not available and API access denied. Run as Administrator for API access.',
+                'method_used': None
+            }
+
+        try:
+            # Use GUI navigation to toggle Bluetooth
+            action_word = "turn on" if desired_state == "On" else "turn off"
+            goal = f"{action_word} bluetooth"
+
+            print(f"[BLUETOOTH] Using GUI automation to {action_word} Bluetooth...", file=sys.stderr)
+
+            gui_result = self.gui_actions.ai_guided_navigation(
+                goal=goal,
+                window_search_terms=["Settings", "Bluetooth"],
+                open_command="start ms-settings:bluetooth"
+            )
+
+            # Give Windows time to update state
+            import time
+            time.sleep(2)
+
+            # Verify state changed
+            success, new_state, msg = self.get_bluetooth_state()
+
+            if success and new_state == desired_state:
+                return {
+                    'success': True,
+                    'current_state': new_state,
+                    'message': f'Bluetooth turned {desired_state} via GUI automation',
+                    'method_used': 'gui_automation'
+                }
+            else:
                 return {
                     'success': False,
-                    'current_state': current_state,
-                    'message': f'Failed to change Bluetooth state: {result.stderr}',
-                    'method_used': 'windows_runtime_api'
+                    'current_state': new_state if success else 'Unknown',
+                    'message': f'GUI automation completed but state verification failed. Expected: {desired_state}, Current: {new_state}',
+                    'method_used': 'gui_automation'
                 }
 
         except Exception as e:
             return {
                 'success': False,
                 'current_state': current_state,
-                'message': f'Exception while changing Bluetooth state: {str(e)}',
-                'method_used': 'windows_runtime_api'
+                'message': f'GUI automation failed: {str(e)}',
+                'method_used': 'gui_automation'
             }
 
     def turn_on(self) -> Dict:
