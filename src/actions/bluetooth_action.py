@@ -198,7 +198,10 @@ if ($bluetooth) {{
 
     def _gui_fallback(self, desired_state: str, current_state: str) -> Dict:
         """
-        Fallback to GUI automation when API access is denied
+        Fallback to keyboard navigation when API access is denied
+
+        Uses keyboard navigation (Tab + Space) to toggle Bluetooth since
+        the toggle button is often unnamed and hard to detect.
 
         Args:
             desired_state: "On" or "Off"
@@ -207,30 +210,26 @@ if ($bluetooth) {{
         Returns:
             Result dictionary with success status
         """
-        if not self.gui_actions:
-            return {
-                'success': False,
-                'current_state': current_state,
-                'message': 'GUI automation not available and API access denied. Run as Administrator for API access.',
-                'method_used': None
-            }
-
         try:
-            # Use GUI navigation to toggle Bluetooth
-            action_word = "turn on" if desired_state == "On" else "turn off"
-            goal = f"{action_word} bluetooth"
-
-            print(f"[BLUETOOTH] Using GUI automation to {action_word} Bluetooth...", file=sys.stderr)
-
-            gui_result = self.gui_actions.ai_guided_navigation(
-                goal=goal,
-                window_search_terms=["Settings", "Bluetooth"],
-                open_command="start ms-settings:bluetooth"
-            )
-
-            # Give Windows time to update state
             import time
+            import pyautogui
+
+            print(f"[BLUETOOTH] Using keyboard navigation to toggle Bluetooth...", file=sys.stderr)
+
+            # Open Bluetooth settings
+            subprocess.run(["cmd", "/c", "start ms-settings:bluetooth"], shell=True)
             time.sleep(2)
+
+            # Press Tab 2 times to reach the Bluetooth toggle (typical Windows 11 layout)
+            # First Tab goes to search box, second Tab goes to main Bluetooth toggle
+            pyautogui.press('tab')
+            time.sleep(0.3)
+            pyautogui.press('tab')
+            time.sleep(0.3)
+
+            # Press Space to toggle
+            pyautogui.press('space')
+            time.sleep(1)
 
             # Verify state changed
             success, new_state, msg = self.get_bluetooth_state()
@@ -239,23 +238,23 @@ if ($bluetooth) {{
                 return {
                     'success': True,
                     'current_state': new_state,
-                    'message': f'Bluetooth turned {desired_state} via GUI automation',
-                    'method_used': 'gui_automation'
+                    'message': f'Bluetooth turned {desired_state} via keyboard navigation',
+                    'method_used': 'keyboard_navigation'
                 }
             else:
                 return {
                     'success': False,
                     'current_state': new_state if success else 'Unknown',
-                    'message': f'GUI automation completed but state verification failed. Expected: {desired_state}, Current: {new_state}',
-                    'method_used': 'gui_automation'
+                    'message': f'Keyboard navigation completed but state verification failed. Expected: {desired_state}, Current: {new_state}',
+                    'method_used': 'keyboard_navigation'
                 }
 
         except Exception as e:
             return {
                 'success': False,
                 'current_state': current_state,
-                'message': f'GUI automation failed: {str(e)}',
-                'method_used': 'gui_automation'
+                'message': f'Keyboard navigation failed: {str(e)}. Run as Administrator for API access.',
+                'method_used': 'keyboard_navigation'
             }
 
     def turn_on(self) -> Dict:
