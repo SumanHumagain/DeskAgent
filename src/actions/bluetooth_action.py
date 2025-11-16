@@ -7,6 +7,18 @@ import sys
 from typing import Dict, Tuple
 
 
+# Import admin utilities for privilege checking
+try:
+    from admin_utils import is_admin, prompt_for_admin_gui
+    ADMIN_UTILS_AVAILABLE = True
+except ImportError:
+    ADMIN_UTILS_AVAILABLE = False
+    def is_admin():
+        return False
+    def prompt_for_admin_gui():
+        return False
+
+
 # Import GUI actions for fallback when admin privileges not available
 try:
     from actions.gui_actions import GUIActions
@@ -187,14 +199,45 @@ if ($bluetooth) {{
                         'method_used': 'windows_runtime_api'
                     }
             else:
-                # API failed - try GUI fallback
-                print(f"[BLUETOOTH] Windows Runtime API failed, trying GUI fallback...", file=sys.stderr)
-                return self._gui_fallback(desired_state, current_state)
+                # API failed - check if we need admin
+                if not is_admin():
+                    print(f"[BLUETOOTH] Windows Runtime API failed - admin required", file=sys.stderr)
+                    # Prompt for admin elevation
+                    if prompt_for_admin_gui():
+                        # User approved - elevation should have happened, but we're still here
+                        # This means elevation was successful and we're in the new process
+                        pass
+                    # Try GUI fallback as last resort
+                    print(f"[BLUETOOTH] Trying GUI fallback...", file=sys.stderr)
+                    return self._gui_fallback(desired_state, current_state)
+                else:
+                    # Already admin but still failed
+                    return {
+                        'success': False,
+                        'current_state': current_state,
+                        'message': f'Failed to change Bluetooth state even with admin: {result.stderr}',
+                        'method_used': 'windows_runtime_api'
+                    }
 
         except Exception as e:
-            # API exception - try GUI fallback
-            print(f"[BLUETOOTH] Windows Runtime API exception, trying GUI fallback...", file=sys.stderr)
-            return self._gui_fallback(desired_state, current_state)
+            # API exception - check if we need admin
+            if not is_admin():
+                print(f"[BLUETOOTH] Windows Runtime API exception - admin required", file=sys.stderr)
+                # Prompt for admin elevation
+                if prompt_for_admin_gui():
+                    # User approved - elevation should have happened
+                    pass
+                # Try GUI fallback as last resort
+                print(f"[BLUETOOTH] Trying GUI fallback...", file=sys.stderr)
+                return self._gui_fallback(desired_state, current_state)
+            else:
+                # Already admin but still failed
+                return {
+                    'success': False,
+                    'current_state': current_state,
+                    'message': f'Exception while changing Bluetooth state even with admin: {str(e)}',
+                    'method_used': 'windows_runtime_api'
+                }
 
     def _gui_fallback(self, desired_state: str, current_state: str) -> Dict:
         """
