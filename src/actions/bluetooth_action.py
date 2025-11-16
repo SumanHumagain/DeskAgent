@@ -228,7 +228,14 @@ if ($bluetooth) {{
                 settings_window.wait('visible', timeout=5)
 
                 # Find all ToggleButton controls in the Settings window
-                toggle_buttons = settings_window.descendants(control_type="ToggleButton")
+                # In pywinauto UIA, control_type should be "Button" with TogglePattern
+                toggle_buttons = []
+                for desc in settings_window.descendants():
+                    try:
+                        if desc.element_info.control_type == "ToggleButton":
+                            toggle_buttons.append(desc)
+                    except:
+                        continue
 
                 print(f"[BLUETOOTH] Found {len(toggle_buttons)} ToggleButton controls", file=sys.stderr)
 
