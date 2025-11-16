@@ -14,6 +14,7 @@ from actions.email_actions import EmailActions
 from actions.gui_actions import GUIActions
 from actions.code_executor import CodeExecutor
 from actions.system_info_actions import SystemInfoActions
+from actions.bluetooth_action import BluetoothAction
 
 
 class Executor:
@@ -27,6 +28,7 @@ class Executor:
         self.gui_actions = GUIActions()
         self.code_executor = CodeExecutor()
         self.system_info_actions = SystemInfoActions()
+        self.bluetooth_action = BluetoothAction()
 
         # Action registry - maps action names to handler methods
         self.action_handlers = {
@@ -51,6 +53,11 @@ class Executor:
             'run_powershell': self.code_executor.run_powershell,
             # SYSTEM INFO ACTIONS
             'get_top_processes_by_memory': self.system_info_actions.get_top_processes_by_memory,
+            # BLUETOOTH ACTIONS (Professional state-checking implementation)
+            'bluetooth_on': self.bluetooth_action.turn_on,
+            'bluetooth_off': self.bluetooth_action.turn_off,
+            'bluetooth_toggle': self.bluetooth_action.toggle,
+            'bluetooth_state': self.bluetooth_action.get_bluetooth_state,
             'chat': self._handle_chat,
         }
 
