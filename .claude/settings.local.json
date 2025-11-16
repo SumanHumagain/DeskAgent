@@ -19,7 +19,12 @@
       "Bash(git add:*)",
       "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --prompt \"turn off windows firewall domain network\" --plan-only)",
       "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --execute-plan)",
-      "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --prompt \"turn off windows firewall domain network using gui\" --plan-only)"
+      "Bash(\"venv\\Scripts\\python.exe\" \"src\\api_wrapper.py\" --prompt \"turn off windows firewall domain network using gui\" --plan-only)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nImprove GUI automation with dynamic Settings detection\n\n- Fixed navigation bug: Now detects Settings vs Wizard operations dynamically  \n- Stops clicking Taskbar buttons repeatedly\n- Uses original window search terms to find proper windows\n- Added comprehensive Settings indicators (firewall, bluetooth, wifi, etc.)\n- Created missing system_info_actions.py file\n- GUI automation now works for firewall operations\n\nPartial success: Navigates to firewall settings but needs window title adaptation for multi-step dialogs\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(\"S:\\Git Projects\\desktop-automation-agent\\venv\\Scripts\\python.exe\" \"S:\\Git Projects\\desktop-automation-agent\\src\\api_wrapper.py\" --get-logs 5)"
     ],
     "deny": [],
     "ask": []

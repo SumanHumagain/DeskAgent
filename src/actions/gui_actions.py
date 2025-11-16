@@ -780,7 +780,20 @@ class GUIActions:
                     time.sleep(1)
                     continue
 
-                # Step 2: Ask AI what to do
+                # Step 2: Filter out already-clicked controls
+                clicked_elements = set()
+                for step in steps_completed:
+                    # Extract element name from "Clicked 'ElementName'" format
+                    if "Clicked '" in step:
+                        elem_name = step.split("Clicked '")[1].split("'")[0]
+                        clicked_elements.add(elem_name)
+
+                # Remove already-clicked controls from the list
+                available_controls = [
+                    ctrl for ctrl in ui_info['controls']
+                    if ctrl['name'] not in clicked_elements
+                ]
+
                 steps_context = f"Steps completed so far: {steps_completed}" if steps_completed else "This is the first step"
                 ai_prompt = f"""You are analyzing a Windows UI to achieve this goal: "{goal}"
 
@@ -788,8 +801,8 @@ class GUIActions:
 
 Window: {ui_info['window']}
 
-Available controls:
-{json.dumps(ui_info['controls'], indent=2)}
+Available controls (already-clicked elements have been removed):
+{json.dumps(available_controls, indent=2)}
 
 CRITICAL RULES:
 1. For "turn on/off" goals: Look for controls with type "ToggleButton" or "Button" with state "Off"/"On"

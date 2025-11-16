@@ -189,8 +189,10 @@ ADVANCED FEATURES:
    - "increase volume" / "volume max" / "unmute" →
      {{"action": "navigate_settings", "args": {{"ui_path": ["Volume"], "action": {{"type": "slider", "name": "volume", "value": "max"}}}}}}
 
-   - "turn on bluetooth" → Use ai_navigate action (AI will analyze UI and figure out what to do dynamically):
-     {{"action": "ai_navigate", "args": {{"goal": "turn on bluetooth", "window_search_terms": ["Settings", "Bluetooth"], "open_command": "start ms-settings:bluetooth"}}}}
+   - "turn on bluetooth" / "turn off bluetooth" / "enable bluetooth" / "disable bluetooth" → Use PowerShell for reliability:
+     * "turn on bluetooth" → `Add-Type -AssemblyName System.Runtime.WindowsRuntime; $asTaskGeneric = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {{ $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation``1' }})[0]; Function Await($WinRtTask, $ResultType) {{ $asTask = $asTaskGeneric.MakeGenericMethod($ResultType); $netTask = $asTask.Invoke($null, @($WinRtTask)); $netTask.Wait(-1) | Out-Null; $netTask.Result }}; [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null; [Windows.Devices.Radios.RadioAccessStatus,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null; Await ([Windows.Devices.Radios.Radio]::RequestAccessAsync()) ([Windows.Devices.Radios.RadioAccessStatus]) | Out-Null; $radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]]); $bluetooth = $radios | Where-Object {{ $_.Kind -eq 'Bluetooth' }}; [Windows.Devices.Radios.RadioState,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null; if ($bluetooth.State -ne 'On') {{ Await ($bluetooth.SetStateAsync('On')) ([Windows.Devices.Radios.RadioAccessStatus]) | Out-Null; Write-Host 'Bluetooth turned ON' }} else {{ Write-Host 'Bluetooth already ON' }}`
+     * "turn off bluetooth" → Same script but use SetStateAsync('Off')
+   - This directly controls Bluetooth via Windows Runtime API - much more reliable than GUI!
 
    **Key principle - TRULY DYNAMIC APPROACH:**
 
