@@ -17,7 +17,7 @@ from planner import Planner
 from validator import Validator
 from executor import Executor
 from logger import AuditLogger
-from utils.admin_elevation import AdminElevation, is_admin
+from admin_utils import is_admin, prompt_for_admin
 
 
 def create_plan_from_prompt(prompt: str, conversation_history: list = None) -> dict:
@@ -167,19 +167,24 @@ def main():
     args = parser.parse_args()
 
     # Check admin status on startup and log
-    admin_status = AdminElevation.get_admin_status()
     if args.execute_plan:
         # Only log for execution (not for planning)
-        print(f"[ADMIN] {admin_status['message']}", file=sys.stderr)
-        if not admin_status['is_admin']:
-            print(f"[ADMIN] WARNING: {admin_status['recommendation']}", file=sys.stderr)
+        if is_admin():
+            print(f"[ADMIN] Running with Administrator privileges", file=sys.stderr)
+        else:
+            print(f"[ADMIN] Running without Administrator privileges", file=sys.stderr)
+            print(f"[ADMIN] WARNING: Please run as Administrator for full functionality", file=sys.stderr)
             print(f"[ADMIN] Some operations (firewall, bluetooth, etc.) may require administrator privileges", file=sys.stderr)
 
     result = None
 
     # Handle admin check
     if args.check_admin:
-        result = admin_status
+        result = {
+            'is_admin': is_admin(),
+            'message': 'Running with Administrator privileges' if is_admin() else 'Running without Administrator privileges',
+            'recommendation': 'Full functionality enabled' if is_admin() else 'Please run as Administrator for full functionality'
+        }
     # Handle different modes
     elif args.prompt:
         # Read conversation history from stdin if flag is set

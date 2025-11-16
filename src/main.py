@@ -18,6 +18,7 @@ from planner import Planner
 from validator import Validator
 from executor import Executor
 from logger import AuditLogger
+from admin_utils import is_admin, prompt_for_admin
 
 console = Console()
 
@@ -114,6 +115,17 @@ def interactive_mode(args):
     logger = AuditLogger()
 
     print_banner()
+
+    # Check for admin privileges and prompt if needed
+    prompt_for_admin(interactive=True)
+
+    # Show admin status
+    if is_admin():
+        console.print("[green]✓ Running with Administrator privileges[/green]")
+        console.print("[dim]  Full functionality enabled (Bluetooth, Firewall, etc.)[/dim]\n")
+    else:
+        console.print("[yellow]⚠ Running without Administrator privileges[/yellow]")
+        console.print("[dim]  Some features limited (Bluetooth control, Firewall, etc.)[/dim]\n")
 
     if args.dry_run:
         console.print("[yellow]Running in DRY RUN mode - actions will not be executed[/yellow]\n")
