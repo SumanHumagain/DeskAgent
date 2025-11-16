@@ -66,6 +66,45 @@ def request_admin_elevation():
         raise Exception(f"Admin elevation failed: {str(e)}")
 
 
+def prompt_for_admin_gui():
+    """
+    Show a graphical dialog asking for admin elevation
+
+    Returns:
+        bool: True if user approved and elevation succeeded, False otherwise
+    """
+    if is_admin():
+        return True
+
+    # Show Windows MessageBox asking for admin
+    message = (
+        "This operation requires Administrator privileges.\n\n"
+        "Features requiring admin:\n"
+        "  • Bluetooth control (turn on/off)\n"
+        "  • Windows Firewall management\n"
+        "  • System settings modifications\n\n"
+        "Allow admin access?"
+    )
+
+    title = "Administrator Privileges Required"
+
+    # MB_YESNO = 0x04, MB_ICONQUESTION = 0x20, MB_TOPMOST = 0x40000
+    # IDYES = 6
+    result = ctypes.windll.user32.MessageBoxW(0, message, title, 0x04 | 0x20 | 0x40000)
+
+    if result == 6:  # User clicked Yes
+        try:
+            request_admin_elevation()
+            return True
+        except Exception as e:
+            # Show error dialog
+            error_msg = f"Failed to elevate privileges:\n\n{str(e)}\n\nContinuing with limited functionality."
+            ctypes.windll.user32.MessageBoxW(0, error_msg, "Elevation Failed", 0x10 | 0x40000)
+            return False
+    else:
+        return False
+
+
 def prompt_for_admin(interactive=True):
     """
     Prompt user for admin privileges and handle elevation
@@ -79,6 +118,11 @@ def prompt_for_admin(interactive=True):
     if is_admin():
         return True
 
+    # For GUI mode, always use graphical prompt
+    if os.environ.get('DESKTOP_AUTOMATION_GUI_MODE') or not interactive:
+        return prompt_for_admin_gui()
+
+    # Console mode prompt
     print("\n" + "="*70)
     print("  ADMIN PRIVILEGES REQUIRED")
     print("="*70)
