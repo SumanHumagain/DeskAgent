@@ -198,10 +198,10 @@ if ($bluetooth) {{
 
     def _gui_fallback(self, desired_state: str, current_state: str) -> Dict:
         """
-        Fallback to keyboard navigation when API access is denied
+        Fallback to direct ToggleButton interaction when API access is denied
 
-        Uses keyboard navigation (Tab + Space) to toggle Bluetooth since
-        the toggle button is often unnamed and hard to detect.
+        Directly finds and clicks the Bluetooth ToggleButton using pywinauto,
+        bypassing AI introspection.
 
         Args:
             desired_state: "On" or "Off"
@@ -212,49 +212,82 @@ if ($bluetooth) {{
         """
         try:
             import time
-            import pyautogui
+            from pywinauto import Desktop
+            from pywinauto.application import Application
 
-            print(f"[BLUETOOTH] Using keyboard navigation to toggle Bluetooth...", file=sys.stderr)
+            print(f"[BLUETOOTH] Using direct ToggleButton interaction...", file=sys.stderr)
 
             # Open Bluetooth settings
             subprocess.run(["cmd", "/c", "start ms-settings:bluetooth"], shell=True)
             time.sleep(2)
 
-            # Press Tab 2 times to reach the Bluetooth toggle (typical Windows 11 layout)
-            # First Tab goes to search box, second Tab goes to main Bluetooth toggle
-            pyautogui.press('tab')
-            time.sleep(0.3)
-            pyautogui.press('tab')
-            time.sleep(0.3)
+            # Find Settings window
+            try:
+                desktop = Desktop(backend="uia")
+                settings_window = desktop.window(title_re=".*Settings.*")
+                settings_window.wait('visible', timeout=5)
 
-            # Press Space to toggle
-            pyautogui.press('space')
-            time.sleep(1)
+                # Find all ToggleButton controls in the Settings window
+                toggle_buttons = settings_window.descendants(control_type="ToggleButton")
 
-            # Verify state changed
-            success, new_state, msg = self.get_bluetooth_state()
+                print(f"[BLUETOOTH] Found {len(toggle_buttons)} ToggleButton controls", file=sys.stderr)
 
-            if success and new_state == desired_state:
-                return {
-                    'success': True,
-                    'current_state': new_state,
-                    'message': f'Bluetooth turned {desired_state} via keyboard navigation',
-                    'method_used': 'keyboard_navigation'
-                }
-            else:
-                return {
-                    'success': False,
-                    'current_state': new_state if success else 'Unknown',
-                    'message': f'Keyboard navigation completed but state verification failed. Expected: {desired_state}, Current: {new_state}',
-                    'method_used': 'keyboard_navigation'
-                }
+                # Find the Bluetooth toggle by checking toggle state
+                # The main Bluetooth toggle should match the current state
+                bluetooth_toggle = None
+                for toggle in toggle_buttons:
+                    try:
+                        toggle_state = toggle.get_toggle_state()
+                        current_toggle_state = "On" if toggle_state == 1 else "Off"
+
+                        # The main Bluetooth toggle should match the system Bluetooth state
+                        if current_toggle_state == current_state:
+                            bluetooth_toggle = toggle
+                            print(f"[BLUETOOTH] Found Bluetooth toggle with state: {current_toggle_state}", file=sys.stderr)
+                            break
+                    except:
+                        continue
+
+                if not bluetooth_toggle:
+                    # If we can't match by state, just use the first ToggleButton
+                    if toggle_buttons:
+                        bluetooth_toggle = toggle_buttons[0]
+                        print(f"[BLUETOOTH] Using first ToggleButton as fallback", file=sys.stderr)
+                    else:
+                        raise Exception("No ToggleButton controls found")
+
+                # Click the toggle
+                bluetooth_toggle.click_input()
+                time.sleep(2)
+
+                # Verify state changed
+                success, new_state, msg = self.get_bluetooth_state()
+
+                if success and new_state == desired_state:
+                    return {
+                        'success': True,
+                        'current_state': new_state,
+                        'message': f'Bluetooth turned {desired_state} via direct toggle click',
+                        'method_used': 'direct_toggle_click'
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'current_state': new_state if success else 'Unknown',
+                        'message': f'Toggle clicked but state verification failed. Expected: {desired_state}, Current: {new_state}',
+                        'method_used': 'direct_toggle_click'
+                    }
+
+            except Exception as e:
+                print(f"[BLUETOOTH] Direct toggle failed: {str(e)}", file=sys.stderr)
+                raise
 
         except Exception as e:
             return {
                 'success': False,
                 'current_state': current_state,
-                'message': f'Keyboard navigation failed: {str(e)}. Run as Administrator for API access.',
-                'method_used': 'keyboard_navigation'
+                'message': f'Direct toggle interaction failed: {str(e)}. Run as Administrator for API access.',
+                'method_used': 'direct_toggle_click'
             }
 
     def turn_on(self) -> Dict:
