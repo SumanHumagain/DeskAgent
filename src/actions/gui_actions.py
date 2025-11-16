@@ -791,8 +791,17 @@ Window: {ui_info['window']}
 Available controls:
 {json.dumps(ui_info['controls'], indent=2)}
 
-Based on the controls available, what is the NEXT action to take?
-For uninstall wizards, look for buttons like: "Uninstall", "Next", "Yes", "Confirm", "Finish", "Close", "OK"
+CRITICAL RULES:
+1. For "turn on/off" goals: Look for controls with type "ToggleButton" or "Button" with state "Off"/"On"
+2. NEVER click the same element twice - if you already clicked it, try a different control
+3. AVOID clicking navigation elements (like "Bluetooth & devices", "System") if you already navigated
+4. Prioritize: ToggleButton > Button > Hyperlink > Text
+5. For toggle operations: use action_type "click" on the ToggleButton (clicking toggles it)
+
+Common patterns:
+- Bluetooth toggle: Look for ToggleButton with state "Off" or "On"
+- Settings navigation: Click categories once, then find the actual control
+- Uninstall wizards: "Uninstall", "Next", "Yes", "Confirm", "Finish", "Close", "OK"
 
 Respond with ONLY a JSON object:
 {{
